@@ -11,5 +11,6 @@ DS_Store
 
 #Debug File
 api/debug.txt
+debug.tkt
 api/__pycache__/main.cpython-310.pyc
 api/__pycache__/__init__.cpython-310.pyc
