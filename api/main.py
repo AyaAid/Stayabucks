@@ -1,8 +1,8 @@
 from fastapi import FastAPI
-from routes.login import router_login
-from routes.sign_up import router_sign_up
-from routes.logout import router_logout
-from routes.update_user import router_update_user
+from routers.login import router_login
+from routers.sign_up import router_sign_up
+from routers.logout import router_logout
+from routers.update_user import router_update_user
 
 app = FastAPI()
 
