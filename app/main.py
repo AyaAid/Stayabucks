@@ -1,7 +1,6 @@
 from fastapi import FastAPI
-from app.models import User, StarbucksDrink
-from app.auth import get_current_user
-from app.routes import user_routes, starbucks_routes, order_routes
+from api.routes import starbucks_routes
+from api.routes import user_routes, order_routes
 
 app = FastAPI()
 
