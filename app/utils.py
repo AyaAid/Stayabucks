@@ -1,1 +1,0 @@
-# Vous pouvez ajouter des fonctions utilitaires ici au besoin
