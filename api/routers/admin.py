@@ -39,7 +39,7 @@ async def add_drink(drinks: Drinks):
         )
         conn.commit()
         close_database_connection()
-        return {"message": "Boisson ajoutée avec succès"}
+        return {"message": "Boisson ajoutée avec succès"}, 200
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -63,7 +63,7 @@ async def add_supplement(supplement: Supplement):
 
         if type_result is None:
             close_database_connection()
-            return {"message": "Le type n'existe pas"}
+            return {"message": "Le type n'existe pas"}, 404
 
         cursor.execute(
             "INSERT INTO supplement (name, price, type_id) VALUES (%s, %s, %s)",
@@ -71,7 +71,7 @@ async def add_supplement(supplement: Supplement):
         )
         conn.commit()
         close_database_connection()
-        return {"message": "Supplément ajouté avec succès"}
+        return {"message": "Supplément ajouté avec succès"}, 200
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -96,7 +96,7 @@ async def update_drink(drink_id: int, updated_drink: Drinks):
 
         if drink_result is None:
             close_database_connection()
-            return {"message": "La boisson n'existe pas"}
+            return {"message": "La boisson n'existe pas"}, 404
 
         cursor.execute(
             "UPDATE drink SET name = %s, description = %s, price = %s WHERE id = %s",
@@ -104,7 +104,7 @@ async def update_drink(drink_id: int, updated_drink: Drinks):
         )
         conn.commit()
         close_database_connection()
-        return {"message": "Boisson mise à jour avec succès"}
+        return {"message": "Boisson mise à jour avec succès"}, 200
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -129,14 +129,14 @@ async def update_supplement(supplement_id: int, updated_supplement: Supplement):
 
         if supplement_result is None:
             close_database_connection()
-            return {"message": "Le supplément n'existe pas"}
+            return {"message": "Le supplément n'existe pas"}, 404
 
         cursor.execute("SELECT id FROM supplement_type WHERE id = %s", (updated_supplement.type_id,))
         type_result = cursor.fetchone()
 
         if type_result is None:
             close_database_connection()
-            return {"message": "Le type du supplément n'existe pas"}
+            return {"message": "Le type du supplément n'existe pas"}, 404
 
         cursor.execute(
             "UPDATE supplement SET name = %s, price = %s, type_id = %s WHERE id = %s",
@@ -144,7 +144,7 @@ async def update_supplement(supplement_id: int, updated_supplement: Supplement):
         )
         conn.commit()
         close_database_connection()
-        return {"message": "Supplément mis à jour avec succès"}
+        return {"message": "Supplément mis à jour avec succès"}, 200
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -168,12 +168,12 @@ async def delete_drink(drink_id: int):
 
         if drink_result is None:
             close_database_connection()
-            return {"message": "La boisson n'existe pas"}
+            return {"message": "La boisson n'existe pas"}, 404
 
         cursor.execute("DELETE FROM drink WHERE id = %s", (drink_id,))
         conn.commit()
         close_database_connection()
-        return {"message": "Boisson supprimée avec succès"}
+        return {"message": "Boisson supprimée avec succès"}, 200
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -197,11 +197,11 @@ async def delete_supplement(supplement_id: int):
 
         if supplement_result is None:
             close_database_connection()
-            return {"message": "Le supplément n'existe pas"}
+            return {"message": "Le supplément n'existe pas"}, 404
 
         cursor.execute("DELETE FROM supplement WHERE id = %s", (supplement_id,))
         conn.commit()
         close_database_connection()
-        return {"message": "Supplément supprimé avec succès"}
+        return {"message": "Supplément supprimé avec succès"}, 200
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
