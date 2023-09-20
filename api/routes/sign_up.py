@@ -1,6 +1,8 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, APIRouter
 from .database import connect_to_database, close_database_connection
 from pydantic import BaseModel
+
+router_sign_up = APIRouter()
 
 # Modèle Pydantic pour la création d'un nouvel utilisateur
 
@@ -10,7 +12,7 @@ class UserCreate(BaseModel):
     email: str
     password: str
 
-
+@router_sign_up.post("/signup/")
 def signup_user(user: UserCreate):
     """
     Inscrit un nouvel utilisateur dans la base de données.
