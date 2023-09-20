@@ -7,3 +7,8 @@ DS_Store
 
 # Environement File
 .env
+
+# Python
+
+__pycache__/
+.pytest_cache/
