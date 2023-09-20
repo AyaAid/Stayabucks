@@ -1,3 +1,4 @@
+import json
 from typing import Dict
 
 from fastapi import HTTPException, APIRouter
@@ -22,17 +23,15 @@ async def createdrinks(drinks: Drinks):
     """
     try:
         conn, cursor = connect_to_database()
+        supplement_id_json = json.dumps(drinks.supplement_id)
         cursor.execute(
             "INSERT INTO drink_created (user_id, drink_id, supplement_id) VALUES (%s, %s, %s)",
-            (drinks.user_id, drinks.drink_id, drinks.supplement_id)
+            (drinks.user_id, drinks.drink_id, supplement_id_json)
         )
         conn.commit()
-        close_database_connection(conn)
-
+        close_database_connection()
         return {"message": "Boisson créée avec succès"}
     except Exception as e:
         conn.rollback()
-        raise HTTPException(status_code=500, detail="Erreur lors de la création de la boisson")
-    finally:
-        close_database_connection(conn)
+        raise HTTPException(status_code=500, detail=e)
 
