@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from .database import connect_to_database, close_database_connection
 
 def login_user(email: str, password: str):
-    db_cursor = connect_to_database()
+    db_connection, db_cursor = connect_to_database()
     
     try:
         # Recherchez l'utilisateur dans la base de données

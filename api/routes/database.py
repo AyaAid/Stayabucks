@@ -2,9 +2,10 @@ import mysql.connector
 import os
 from dotenv import load_dotenv
 
-# Configuration de la connexion à la base de données en utilisant les informations du fichier .env
-env = load_dotenv(".env")  # Chargez les variables d'environnement depuis le fichier .env
+# Chargez les variables d'environnement depuis le fichier .env.dist
+load_dotenv("api/.env")
 
+# Configuration de la connexion à la base de données en utilisant les informations du fichier .env.dist
 db_config = {
     "user": os.getenv("POSTGRES_USER"),
     "password": os.getenv("POSTGRES_PASSWORD"),
