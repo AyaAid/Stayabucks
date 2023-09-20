@@ -22,7 +22,7 @@ def update_user(user_id: int, user_update: UserUpdate):
         Dict[str, str]: Un dictionnaire contenant un message de succès.
 
     Raises:
-        HTTPException: En cas d'échec de la mise à jour.
+        HTTPException: En cas d'échec de la mise à jour ou si l'utilisateur n'est pas trouvé.
     """
     db_connection, db_cursor = connect_to_database()
 

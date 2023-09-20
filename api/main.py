@@ -16,3 +16,11 @@ if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+"""
+Fichier principal de l'application FastAPI Stayabucks.
+
+Ce fichier configure l'application FastAPI en ajoutant des routeurs pour les fonctionnalités de connexion,
+d'inscription, de déconnexion et de mise à jour de l'utilisateur.
+
+"""
