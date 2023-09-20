@@ -2,8 +2,9 @@ from fastapi import HTTPException
 from .database import connect_to_database, close_database_connection
 from pydantic import BaseModel
 
-
 # Modèle Pydantic pour la création d'un nouvel utilisateur
+
+
 class UserCreate(BaseModel):
     username: str
     email: str
@@ -11,6 +12,18 @@ class UserCreate(BaseModel):
 
 
 def signup_user(user: UserCreate):
+    """
+    Inscrit un nouvel utilisateur dans la base de données.
+
+    Args:
+        user (UserCreate): Informations de l'utilisateur à inscrire.
+
+    Returns:
+        Dict[str, str]: Un dictionnaire contenant un message de succès.
+
+    Raises:
+        HTTPException: En cas d'échec de l'inscription.
+    """
     db_connection, db_cursor = connect_to_database()
 
     try:

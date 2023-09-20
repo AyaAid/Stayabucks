@@ -2,8 +2,9 @@ import mysql.connector
 import os
 from dotenv import load_dotenv
 
-# Configuration de la connexion à la base de données en utilisant les informations du fichier .env
-env = load_dotenv(".env")  # Chargez les variables d'environnement depuis le fichier .env
+# Configuration de la connexion à la base de données en utilisant les informations du fichier .env.dist
+# Chargez les variables d'environnement depuis le fichier .env.dist
+env = load_dotenv("api/.env")
 
 db_config = {
     "user": os.getenv("POSTGRES_USER"),
@@ -16,7 +17,14 @@ db_config = {
 db_connection = None
 db_cursor = None
 
+
 def connect_to_database():
+    """
+    Établit une connexion à la base de données et retourne la connexion et le curseur.
+
+    Returns:
+        Tuple[mysql.connector.connection.MySQLConnection, mysql.connector.cursor.MySQLCursor]: La connexion et le curseur de la base de données.
+    """
     global db_connection, db_cursor
     try:
         # Créez une connexion à la base de données
@@ -26,7 +34,11 @@ def connect_to_database():
     except mysql.connector.Error as err:
         raise err
 
+
 def close_database_connection():
+    """
+    Ferme la connexion à la base de données.
+    """
     global db_connection, db_cursor
     if db_cursor:
         db_cursor.close()
