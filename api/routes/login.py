@@ -1,7 +1,9 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, APIRouter
 from .database import connect_to_database, close_database_connection
 
+router_login = APIRouter()
 
+@router_login.post("/login/")
 def login_user(email: str, password: str):
     """
     Vérifie les informations d'identification de l'utilisateur dans la base de données et effectue la connexion.

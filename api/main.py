@@ -1,47 +1,12 @@
-from fastapi import FastAPI, APIRouter
-from routes import login, sign_up
+from fastapi import FastAPI
+from routes.login import router_login
+from routes.sign_up import router_sign_up
 
 app = FastAPI()
-router = APIRouter()
-
-# Endpoint pour l'inscription
-
-
-@router.post("/signup/")
-async def signup(user: sign_up.UserCreate):
-    """
-    Endpoint pour l'inscription d'un nouvel utilisateur.
-
-    Args:
-        user (UserCreate): Informations de l'utilisateur à inscrire.
-
-    Returns:
-        Dict[str, str]: Un dictionnaire contenant un message de succès.
-    """
-    return sign_up.signup_user(user)
-
-# Endpoint pour la connexion
-
-
-@router.post("/login/")
-async def login_endpoint(email: str, password: str):
-    """
-    Endpoint pour la connexion d'un utilisateur existant.
-
-    Args:
-        email (str): Mail de l'utilisateur.
-        password (str): Mot de passe de l'utilisateur.
-
-    Returns:
-        Dict[str, str]: Un dictionnaire contenant un message de succès.
-
-    Raises:
-        HTTPException: En cas d'échec de l'authentification.
-    """
-    return login.login_user(email, password)
 
 # Ajoutez le routeur à l'application FastAPI
-app.include_router(router)
+app.include_router(router_login)
+app.include_router(router_sign_up)
 
 if __name__ == "__main__":
     import uvicorn
