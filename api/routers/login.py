@@ -25,7 +25,7 @@ def login_user(email: str, password: str):
         user = db_cursor.fetchone()
 
         if user:
-            return {"message": "Connexion réussie"}
+            return {"message": "Connexion réussie"}, 200
 
         # Si l'utilisateur n'est pas trouvé, renvoyez une erreur
         raise HTTPException(

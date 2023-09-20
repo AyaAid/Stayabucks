@@ -30,7 +30,7 @@ async def createdrinks(drinks: Drinks):
         )
         conn.commit()
         close_database_connection()
-        return {"message": "Boisson créée avec succès"}
+        return {"message": "Boisson créée avec succès"}, 200
     except Exception as e:
         conn.rollback()
         raise HTTPException(status_code=500, detail=e)
@@ -54,6 +54,6 @@ async def showdrinks(user_id):
         close_database_connection()
         if not drinks:
             raise HTTPException(status_code=404, detail="Aucune boisson trouvée pour cet utilisateur")
-        return {"drinks": drinks}
+        return {"drinks": drinks}, 200
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
