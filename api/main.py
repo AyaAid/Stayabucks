@@ -11,8 +11,8 @@ async def signup(user: sign_up.UserCreate):
 
 # Endpoint pour la connexion
 @router.post("/login/")
-async def login_endpoint(username: str, password: str):
-    return login.login_user(username, password)
+async def login_endpoint(email: str, password: str):
+    return login.login_user(email, password)
 
 # Ajoutez le routeur à l'application FastAPI
 app.include_router(router)
