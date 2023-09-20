@@ -1,0 +1,17 @@
+DEBUG:root:Chargement des variables d'environnement : True
+DEBUG:root:Tentative de connexion à la base de données...
+DEBUG:root:Connexion à la base de données réussie.
+DEBUG:root:Email déjà utilisé.
+ERROR:root:Erreur lors de l'inscription : 
+DEBUG:root:Email déjà utilisé.
+ERROR:root:Erreur lors de l'inscription : 
+ERROR:root:Erreur lors de l'inscription : 1062 (23000): Duplicate entry 'votre_nom_utilisateur' for key 'username'
+DEBUG:root:Chargement des variables d'environnement : True
+DEBUG:root:Tentative de connexion à la base de données...
+DEBUG:root:Connexion à la base de données réussie.
+DEBUG:root:Chargement des variables d'environnement : True
+DEBUG:root:Tentative de connexion à la base de données...
+DEBUG:root:Connexion à la base de données réussie.
+DEBUG:root:Chargement des variables d'environnement : True
+DEBUG:root:Tentative de connexion à la base de données...
+DEBUG:root:Connexion à la base de données réussie.
