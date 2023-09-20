@@ -3,13 +3,16 @@
 /.vscode/
 
 # MacOS
-DS_Store
+.DS_Store
 
-# Environement File
+# Environnement File
 .env
 .env.dist
 
-#Debug File
+# Debug File
 api/debug.txt
-api/__pycache__/main.cpython-310.pyc
-api/__pycache__/__init__.cpython-310.pyc
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo

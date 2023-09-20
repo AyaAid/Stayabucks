@@ -9,3 +9,9 @@ ERROR:root:Erreur lors de l'inscription : 1062 (23000): Duplicate entry 'votre_n
 DEBUG:root:Chargement des variables d'environnement : True
 DEBUG:root:Tentative de connexion à la base de données...
 DEBUG:root:Connexion à la base de données réussie.
+DEBUG:root:Chargement des variables d'environnement : True
+DEBUG:root:Tentative de connexion à la base de données...
+DEBUG:root:Connexion à la base de données réussie.
+DEBUG:root:Chargement des variables d'environnement : True
+DEBUG:root:Tentative de connexion à la base de données...
+DEBUG:root:Connexion à la base de données réussie.
