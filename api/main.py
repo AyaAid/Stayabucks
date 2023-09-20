@@ -1,6 +1,6 @@
 from fastapi import FastAPI, APIRouter
 from routers import login, sign_up
-from routers.create_drinks import router
+from routers.drinks import router
 
 app = FastAPI()
 

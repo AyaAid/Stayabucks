@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 # Configuration de la connexion à la base de données en utilisant les informations du fichier .env.dist
 # Chargez les variables d'environnement depuis le fichier .env.dist
-env = load_dotenv("api/.env")
+env = load_dotenv(".env")
 
 db_config = {
     "user": os.getenv("POSTGRES_USER"),

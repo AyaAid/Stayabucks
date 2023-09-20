@@ -35,3 +35,25 @@ async def createdrinks(drinks: Drinks):
         conn.rollback()
         raise HTTPException(status_code=500, detail=e)
 
+
+@router.get('/show-drinks/{user_id}')
+async def showdrinks(user_id):
+    """
+    Function to retrieve drinks created by a specific user
+    :param user_id: user ID to filter drinks
+    :return: List of drinks or an error message
+    """
+    try:
+        user_id = int(user_id)
+        conn, cursor = connect_to_database()
+        cursor.execute(
+            "SELECT * FROM drink_created WHERE user_id = %s",
+            (user_id,)
+        )
+        drinks = cursor.fetchall()
+        close_database_connection()
+        if not drinks:
+            raise HTTPException(status_code=404, detail="Aucune boisson trouvée pour cet utilisateur")
+        return {"drinks": drinks}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
