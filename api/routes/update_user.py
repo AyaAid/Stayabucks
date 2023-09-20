@@ -1,12 +1,15 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, APIRouter
 from .database import connect_to_database, close_database_connection
 from pydantic import BaseModel
+
+router_update_user = APIRouter()
 
 # Modèle Pydantic pour la mise à jour des informations de l'utilisateur
 class UserUpdate(BaseModel):
     username: str
     email: str
 
+@router_update_user.put("/update/{user_id}")
 def update_user(user_id: int, user_update: UserUpdate):
     """
     Met à jour les informations de l'utilisateur dans la base de données.

@@ -1,6 +1,9 @@
-from fastapi import HTTPException
+from fastapi import HTTPException, APIRouter
 from .database import close_database_connection
 
+router_logout = APIRouter()
+
+@router_logout.post("/logout/")
 def logout_user():
     try:
         # Vous pouvez ajouter d'autres opérations de déconnexion ici si nécessaire
