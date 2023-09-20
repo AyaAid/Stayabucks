@@ -1,5 +1,6 @@
 import mysql.connector
 import os
+
 from dotenv import load_dotenv
 
 # Configuration de la connexion à la base de données en utilisant les informations du fichier .env.dist
