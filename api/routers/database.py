@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 
 # Configuration de la connexion à la base de données en utilisant les informations du fichier .env.dist
 # Chargez les variables d'environnement depuis le fichier .env.dist
+
 env = load_dotenv(".env")
 
 db_config = {
