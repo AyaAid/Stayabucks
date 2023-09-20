@@ -62,7 +62,6 @@ def signup_user(user: UserCreate):
         logging.error(f"Erreur lors de l'inscription : {e}")
         raise HTTPException(status_code=500, detail="Erreur lors de l'inscription")
 
-# Fonction pour se connecter (login)
 def login_user(username: str, password: str):
     try:
         # Recherchez l'utilisateur dans la base de données
@@ -76,16 +75,22 @@ def login_user(username: str, password: str):
         # Si l'utilisateur n'est pas trouvé, renvoyez une erreur
         raise HTTPException(status_code=401, detail="Nom d'utilisateur ou mot de passe incorrect")
     except Exception as e:
-        logging.error(f"Erreur lors de la connexion : {e}")
+        logging.error(f"Erreur lors de la connexion : {e}")  # Ajoutez cette ligne pour enregistrer l'erreur
         raise HTTPException(status_code=500, detail="Erreur lors de la connexion")
 
 @router.post("/signup/")
 async def signup_endpoint(user: UserCreate):
     return signup_user(user)
 
+from fastapi import Request
+
 @router.post("/login/")
-async def login_endpoint(username: str, password: str):
+async def login_endpoint(request: Request):
+    data = await request.json()
+    username = data.get("username")
+    password = data.get("password")
     return login_user(username, password)
+
 
 if __name__ == "__main__":
     import uvicorn
