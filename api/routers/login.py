@@ -4,6 +4,7 @@ from .database import connect_to_database, close_database_connection
 router_login = APIRouter()
 
 @router_login.post("/login/")
+
 def login_user(email: str, password: str):
     """
     Vérifie les informations d'identification de l'utilisateur dans la base de données et effectue la connexion.
@@ -27,7 +28,8 @@ def login_user(email: str, password: str):
         user = db_cursor.fetchone()
 
         if user:
-            return {"message": "Connexion réussie"}
+
+            return {"message": "Connexion réussie"}, 200
 
         # Si l'utilisateur n'est pas trouvé, renvoyez une erreur
         raise HTTPException(

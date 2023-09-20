@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 router_sign_up = APIRouter()
 
+
 # Modèle Pydantic pour la création d'un nouvel utilisateur
 
 
@@ -13,6 +14,7 @@ class UserCreate(BaseModel):
     password: str
 
 @router_sign_up.post("/signup/")
+
 def signup_user(user: UserCreate):
     """
     Inscrit un nouvel utilisateur dans la base de données.
@@ -43,7 +45,7 @@ def signup_user(user: UserCreate):
         db_cursor.execute(query, values)
         db_connection.commit()
 
-        return {"message": "Inscription réussie"}
+        return {"message": "Inscription réussie"}, 200
     except Exception as e:
         raise e
     finally:
