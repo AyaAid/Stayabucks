@@ -1,5 +1,4 @@
 import logging
-
 from dotenv import load_dotenv
 from fastapi import APIRouter, HTTPException
 
@@ -9,4 +8,8 @@ router = APIRouter()
 
 env = load_dotenv(".env.dist")  # Chargez les variables d'environnement depuis le fichier .env.dist
 logging.debug(f"Chargement des variables d'environnement : {env}")
+
+@router.post('/create-drink')
+async def createdrinks():
+    break
 
