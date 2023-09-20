@@ -1,5 +1,5 @@
 from fastapi import FastAPI, APIRouter
-from routers.admin import router
+from routers.admin, routers.create_drinks import router
 
 app = FastAPI()
 
