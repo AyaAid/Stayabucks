@@ -63,6 +63,24 @@ async def showdrinks(user_id):
 @router.get("/search/")
 async def search_drinks(query: str = Query(..., description="Recherchez une boisson par nom ou description"),
                         max_price: Optional[float] = Query(None, description="Filtrez par prix maximum")):
+    """
+    Recherche des boissons en fonction d'un terme de recherche (nom ou description) et éventuellement d'un filtre de prix maximum.
+
+    Args:
+        query (str): Terme de recherche pour le nom ou la description de la boisson.
+        max_price (float, optional): Prix maximum pour filtrer les résultats (facultatif).
+
+    Raises:
+        HTTPException 400: Si le filtre de prix est trop bas pour trouver des boissons.
+        HTTPException 404: Si aucune boisson n'est trouvée pour la recherche.
+
+    Returns:
+        list: Liste des boissons correspondantes (peut être vide).
+
+    Example:
+        Pour rechercher des boissons avec le terme "Latte" et un prix maximum de 6.0 :
+        `/search/?query=Latte&max_price=6.0`
+    """
     db_connection, db_cursor = connect_to_database()
 
     try:
