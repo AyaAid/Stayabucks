@@ -4,9 +4,10 @@ from typing import Dict
 from fastapi import HTTPException, APIRouter
 from pydantic import BaseModel
 
-from .database import connect_to_database, close_database_connection
+from api.config.database import connect_to_database, close_database_connection
 
 router = APIRouter()
+
 
 class Drinks(BaseModel):
     user_id: int
@@ -14,7 +15,7 @@ class Drinks(BaseModel):
     supplement_id: Dict
 
 
-@router.post('/create-drink')
+@router.post('/create-drink', tags=["Drinks"])
 async def createdrinks(drinks: Drinks):
     """
     Function to create drinks in database
@@ -36,7 +37,7 @@ async def createdrinks(drinks: Drinks):
         raise HTTPException(status_code=500, detail=e)
 
 
-@router.get('/show-drinks/{user_id}')
+@router.get('/show-drinks/{user_id}', tags=["Drinks"])
 async def showdrinks(user_id):
     """
     Function to retrieve drinks created by a specific user
