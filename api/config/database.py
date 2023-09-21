@@ -1,48 +1,58 @@
 import mysql.connector
 import os
-
 from dotenv import load_dotenv
 
-# Chargez les variables d'environnement depuis le fichier .env
+# Load environment variables from the .env file
+load_dotenv(".env")
 
-env = load_dotenv(".env")
-
-# Configuration de la connexion à la base de données en utilisant les informations du fichier .env
+# Configuration for connecting to the MySQL database using information from the .env file
 db_config = {
-    "user": os.getenv("POSTGRES_USER"),
-    "password": os.getenv("POSTGRES_PASSWORD"),
-    "host": os.getenv("POSTGRES_HOST"),
-    "database": os.getenv("POSTGRES_DB"),
-    "port": os.getenv("POSTGRES_PORT"),
+    "user": os.getenv("MYSQL_USER"),  # MySQL username
+    "password": os.getenv("MYSQL_PASSWORD"),  # MySQL password
+    "host": os.getenv("MYSQL_HOST"),  # MySQL host (e.g., "localhost")
+    "database": os.getenv("MYSQL_DB"),  # MySQL database name
+    "port": os.getenv("MYSQL_PORT"),  # MySQL port number
 }
 
-db_connection = None
-db_cursor = None
 
-
-def connect_to_database():
+class DatabaseConnection:
     """
-    Établit une connexion à la base de données et retourne la connexion et le curseur.
+    A context manager for managing MySQL database connections.
 
-    Returns:
-        Tuple[mysql.connector.connection.MySQLConnection, mysql.connector.cursor.MySQLCursor]: La connexion et le curseur de la base de données.
+    Usage:
+        with DatabaseConnection() as (connection, cursor):
+            # Database operations here
+
+    Attributes:
+        db_connection (mysql.connector.MySQLConnection): The database connection.
+        db_cursor (mysql.connector.cursor.MySQLCursor): The database cursor.
     """
-    global db_connection, db_cursor
-    try:
-        # Créez une connexion à la base de données
-        db_connection = mysql.connector.connect(**db_config)
-        db_cursor = db_connection.cursor(dictionary=True)
-        return db_connection, db_cursor
-    except mysql.connector.Error as err:
-        raise err
+
+    def __init__(self):
+        self.db_connection = None
+        self.db_cursor = None
+
+    def __enter__(self):
+        try:
+            # Create a connection to the MySQL database
+            self.db_connection = mysql.connector.connect(**db_config)
+            self.db_cursor = self.db_connection.cursor(dictionary=True)
+            return self.db_connection, self.db_cursor
+        except mysql.connector.Error as err:
+            raise err
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.db_cursor:
+            self.db_cursor.close()
+        if self.db_connection:
+            self.db_connection.close()
 
 
-def close_database_connection():
-    """
-    Ferme la connexion à la base de données.
-    """
-    global db_connection, db_cursor
-    if db_cursor:
-        db_cursor.close()
-    if db_connection:
-        db_connection.close()
+# Using the MySQL database connection with a context manager
+with DatabaseConnection() as (connection, cursor):
+    if connection is not None and cursor is not None:
+        # Database connection succeeded
+        print("Database connection succeeded.")
+    else:
+        # Database connection failed, take appropriate action
+        print("Database connection failed. Please check connection parameters.")

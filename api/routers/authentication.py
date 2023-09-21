@@ -1,7 +1,6 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import HTTPException, APIRouter
 from pydantic import BaseModel
-
-from config.database import connect_to_database, close_database_connection
+from config.database import DatabaseConnection
 
 router = APIRouter()
 
@@ -21,129 +20,120 @@ class UserUpdate(BaseModel):
     username: str
     email: str
 
-# Endpoint pour l'inscription
+
 @router.post("/signup/", tags=["Authentication"])
 async def signup(user: UserCreate):
     """
-    Inscrit un nouvel utilisateur dans la base de données.
+    Register a new user in the database.
 
     Args:
-        user (UserCreate): Informations de l'utilisateur à inscrire.
+        user (UserCreate): User information for registration.
 
     Returns:
-        Dict[str, str]: Un dictionnaire contenant un message de succès.
+        dict: A dictionary containing a success message.
 
     Raises:
-        HTTPException: En cas d'échec de l'inscription.
+        HTTPException: If registration fails.
     """
-    db_connection, db_cursor = connect_to_database()
-
     try:
-        # Vérifiez si l'utilisateur existe déjà
-        query = "SELECT * FROM users WHERE email = %s"
-        db_cursor.execute(query, (user.email,))
-        existing_user = db_cursor.fetchone()
+        with DatabaseConnection() as (db_connection, db_cursor):
+            # Check if the user already exists
+            query = "SELECT * FROM users WHERE email = %s"
+            db_cursor.execute(query, (user.email,))
+            existing_user = db_cursor.fetchone()
 
-        if existing_user:
-            raise HTTPException(status_code=400, detail="Email déjà utilisé")
+            if existing_user:
+                raise HTTPException(status_code=400, detail="Email already in use")
 
-        # Ajoutez l'utilisateur à la base de données
-        query = "INSERT INTO users (username, email, password, role) VALUES (%s, %s, %s, %s)"
-        values = (user.username, user.email, user.password, "user")
-        db_cursor.execute(query, values)
-        db_connection.commit()
+            # Add the user to the database
+            query = "INSERT INTO users (username, email, password, role) VALUES (%s, %s, %s, %s)"
+            values = (user.username, user.email, user.password, "user")
+            db_cursor.execute(query, values)
+            db_connection.commit()
 
-        return {"message": "Inscription réussie"}
+            return {"message": "Registration successful"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Erreur lors de l'inscription")
-    finally:
-        close_database_connection()
+        raise HTTPException(status_code=500, detail="Error during registration")
 
 
-# Endpoint pour la connexion
 @router.post("/login/", tags=["Authentication"])
 async def login_endpoint(user_data: UserLogin):
     """
-    Vérifie les informations d'identification de l'utilisateur dans la base de données et effectue la connexion.
+    Verify user credentials in the database and perform login.
 
     Args:
-        user_data (UserLogin): Données d'identification de l'utilisateur (email et mot de passe).
+        user_data (UserLogin): User login credentials (email and password).
 
     Returns:
-        Dict[str, str]: Un dictionnaire contenant un message de succès.
+        dict: A dictionary containing a success message.
 
     Raises:
-        HTTPException: En cas d'échec de l'authentification.
+        HTTPException: If authentication fails.
     """
-    db_connection, db_cursor = connect_to_database()
-
     try:
-        # Recherchez l'utilisateur dans la base de données
-        query = "SELECT * FROM users WHERE email = %s AND password = %s"
-        db_cursor.execute(query, (user_data.email, user_data.password))
-        user = db_cursor.fetchone()
+        with DatabaseConnection() as (db_connection, db_cursor):
+            # Search for the user in the database
+            query = "SELECT * FROM users WHERE email = %s AND password = %s"
+            db_cursor.execute(query, (user_data.email, user_data.password))
+            user = db_cursor.fetchone()
 
-        if user is None:
-            raise HTTPException(status_code=401, detail="Mail de l'utilisateur ou mot de passe incorrect")
+            if user is None:
+                raise HTTPException(status_code=401, detail="Incorrect email or password")
 
-        return {"message": "Connexion réussie"}
+            return {"message": "Login successful"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Error during authentication")
 
-
-    # TODO Faire l'exception 500
-    finally:
-        close_database_connection()
 
 @router.post("/logout/", tags=["Authentication"])
 def logout_user():
     """
-    Gère la déconnexion de l'utilisateur en fermant la connexion à la base de données.
+    Handle user logout by closing the database connection.
 
     Returns:
-        Dict[str, str]: Un dictionnaire contenant un message de succès.
+        dict: A dictionary containing a success message.
 
     Raises:
-        HTTPException: En cas d'échec de la déconnexion.
+        HTTPException: If logout fails.
     """
     try:
-        close_database_connection()
-        return {"message": "Déconnexion réussie"}
+        with DatabaseConnection() as (db_connection, _):
+            return {"message": "Logout successful"}
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Erreur lors de la déconnexion")
+        raise HTTPException(status_code=500, detail="Error during logout")
+
 
 @router.put("/update/{user_id}", tags=["Authentication"])
 def update_user(user_id: int, user_update: UserUpdate):
     """
-    Met à jour les informations de l'utilisateur dans la base de données.
+    Update user information in the database.
 
     Args:
-        user_id (int): ID de l'utilisateur à mettre à jour.
-        user_update (UserUpdate): Informations mises à jour de l'utilisateur.
+        user_id (int): ID of the user to be updated.
+        user_update (UserUpdate): Updated user information.
 
     Returns:
-        Dict[str, str]: Un dictionnaire contenant un message de succès.
+        dict: A dictionary containing a success message.
 
     Raises:
-        HTTPException: En cas d'échec de la mise à jour ou si l'utilisateur n'est pas trouvé.
+        HTTPException: If the update fails or if the user is not found.
     """
-    db_connection, db_cursor = connect_to_database()
-
     try:
-        # Vérifiez si l'utilisateur existe
-        query = "SELECT * FROM users WHERE id = %s"
-        db_cursor.execute(query, (user_id,))
-        existing_user = db_cursor.fetchone()
+        with DatabaseConnection() as (db_connection, db_cursor):
+            # Check if the user exists
+            query = "SELECT * FROM users WHERE id = %s"
+            db_cursor.execute(query, (user_id,))
+            existing_user = db_cursor.fetchone()
 
-        if not existing_user:
-            raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+            if not existing_user:
+                raise HTTPException(status_code=404, detail="User not found")
 
-        # Mettez à jour les informations de l'utilisateur
-        query = "UPDATE users SET username = %s, email = %s WHERE id = %s"
-        values = (user_update.username, user_update.email, user_id)
-        db_cursor.execute(query, values)
-        db_connection.commit()
+            # Update user information
+            query = "UPDATE users SET username = %s, email = %s WHERE id = %s"
+            values = (user_update.username, user_update.email, user_id)
+            db_cursor.execute(query, values)
+            db_connection.commit()
 
-        return {"message": "Mise à jour réussie"}
+            return {"message": "Update successful"}
     except Exception as e:
-        raise e
-    finally:
-        close_database_connection()
+        raise HTTPException(status_code=500, detail="Error during update")
