@@ -4,7 +4,7 @@ from typing import Dict
 from fastapi import HTTPException, APIRouter
 from pydantic import BaseModel
 
-from config.database import close_database_connection, connect_to_database
+from config.database import DatabaseConnection  # Import the new connection class
 
 router = APIRouter()
 
@@ -16,66 +16,80 @@ class Drinks(BaseModel):
 
 
 @router.post('/create-drink', tags=["Drinks"])
-async def createdrinks(drinks: Drinks):
+async def create_drink(drinks: Drinks):
     """
-    Function to create drinks in database
-    :param drinks: class w/ requirement of database to create drinks
-    :return: str w/ message of success or type of error
+    Create drinks in the database.
+
+    Args:
+        drinks (Drinks): Information required to create drinks in the database.
+
+    Returns:
+        dict: A dictionary with a success message or an error type.
+
+    Raises:
+        HTTPException: If an error occurs during the operation.
     """
     try:
-        conn, cursor = connect_to_database()
-        supplement_id_json = json.dumps(drinks.supplement_id)
-        cursor.execute(
-            "INSERT INTO drink_created (user_id, drink_id, supplement_id) VALUES (%s, %s, %s)",
-            (drinks.user_id, drinks.drink_id, supplement_id_json)
-        )
-        conn.commit()
-        close_database_connection()
-        return {"message": "Boisson créée avec succès"}, 200
+        # Use the new connection class with a context manager
+        with DatabaseConnection() as (conn, cursor):
+            supplement_id_json = json.dumps(drinks.supplement_id)
+            cursor.execute(
+                "INSERT INTO drink_created (user_id, drink_id, supplement_id) VALUES (%s, %s, %s)",
+                (drinks.user_id, drinks.drink_id, supplement_id_json)
+            )
+            conn.commit()
+        return {"message": "Drink created successfully"}, 200
     except Exception as e:
-        conn.rollback()
-        raise HTTPException(status_code=500, detail=e)
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get('/show-drinks/{user_id}', tags=["Drinks"])
-async def showdrinks(user_id):
+async def show_drinks(user_id):
     """
-    Retrieves drinks created by a specific user.
+    Retrieve drinks created by a specific user.
+
     Args:
         user_id (int): The ID of the user whose drinks are to be retrieved.
+
     Returns:
         dict: A dictionary containing the drinks and their total prices.
+
+    Raises:
+        HTTPException:
+            - 404: If no drinks are found for this user.
+            - 400: If the supplement_ids data is invalid.
+            - 500: If an unexpected error occurs during the operation.
     """
     try:
         user_id = int(user_id)
-        conn, cursor = connect_to_database()
-        cursor.execute(
-            "SELECT drink_id, supplement_id FROM drink_created WHERE user_id = %s",
-            (user_id,)
-        )
-        drinks = cursor.fetchall()
-        drinks_with_prices = []
-        for drink_data in drinks:
-            supplement_id_list = json.loads(drink_data['supplement_id']) if drink_data['supplement_id'] else {}
-            cursor.execute("SELECT price FROM drink WHERE id = %s", (drink_data['drink_id'],))
-            drink_price = cursor.fetchone()
-            if drink_price:
-                drink_price = drink_price['price']
-                total_price = drink_price
-                for supplement_id, quantity in supplement_id_list.items():
-                    cursor.execute("SELECT price FROM supplement WHERE id = %s", (supplement_id,))
-                    supplement_price = cursor.fetchone()
-                    if supplement_price:
-                        supplement_price = supplement_price['price']
-                        total_price += supplement_price * quantity
-                drinks_with_prices.append({
-                    "drink_id": drink_data['drink_id'],
-                    "total_price": total_price
-                })
+        # Use the new connection class with a context manager
+        with DatabaseConnection() as (conn, cursor):
+            cursor.execute(
+                "SELECT drink_id, supplement_id FROM drink_created WHERE user_id = %s",
+                (user_id,)
+            )
+            drinks = cursor.fetchall()
+            drinks_with_prices = []
+            for drink_data in drinks:
+                supplement_id_list = json.loads(drink_data['supplement_id']) if drink_data['supplement_id'] else {}
+                cursor.execute("SELECT price FROM drink WHERE id = %s", (drink_data['drink_id'],))
+                drink_price = cursor.fetchone()
+                if drink_price:
+                    drink_price = drink_price['price']
+                    total_price = drink_price
+                    for supplement_id, quantity in supplement_id_list.items():
+                        cursor.execute("SELECT price FROM supplement WHERE id = %s", (supplement_id,))
+                        supplement_price = cursor.fetchone()
+                        if supplement_price:
+                            supplement_price = supplement_price['price']
+                            total_price += supplement_price * quantity
+                    drinks_with_prices.append({
+                        "drink_id": drink_data['drink_id'],
+                        "total_price": total_price
+                    })
 
-        close_database_connection()
         if not drinks_with_prices:
-            raise HTTPException(status_code=404, detail="Aucune boisson trouvée pour cet utilisateur")
+            raise HTTPException(status_code=404, detail="No drinks found for this user")
 
         return {"drinks": drinks_with_prices}, 200
     except ValueError:
@@ -83,8 +97,9 @@ async def showdrinks(user_id):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
 @router.get('/last-drinks/{user_id}', tags=["Drinks"])
-async def lastdrinks(user_id):
+async def last_drinks(user_id):
     """
     Retrieve the 10 most recent drinks created by a specific user.
 
@@ -98,23 +113,19 @@ async def lastdrinks(user_id):
         HTTPException:
             - 404: If no drinks are found for the specified user.
             - 500: If an unexpected error occurs during the operation.
-
-    Example:
-        To retrieve the 10 most recent drinks for user with ID 123:
-        GET /last-drinks/123
     """
     try:
         user_id = int(user_id)
-        conn, cursor = connect_to_database()
-        cursor.execute(
-            "SELECT * FROM drink_created WHERE user_id = %s ORDER BY id DESC LIMIT 10",
-            (user_id,)
-        )
-        drinks = cursor.fetchall()
-        close_database_connection()
+        # Use the new connection class with a context manager
+        with DatabaseConnection() as (conn, cursor):
+            cursor.execute(
+                "SELECT * FROM drink_created WHERE user_id = %s ORDER BY id DESC LIMIT 10",
+                (user_id,)
+            )
+            drinks = cursor.fetchall()
+
         if not drinks:
-            raise HTTPException(status_code=404, detail="Aucune boisson trouvée pour cet utilisateur")
+            raise HTTPException(status_code=404, detail="No drinks found for this user")
         return {"drinks": drinks}, 200
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-

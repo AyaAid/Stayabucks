@@ -35,7 +35,8 @@ CREATE TABLE supplement (
 CREATE TABLE drink_created (
   id SERIAL PRIMARY KEY,
   user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-  drink_id INTEGER NOT NULL REFERENCES drink(id) ON DELETE CASCADE
+  drink_id INTEGER NOT NULL REFERENCES drink(id) ON DELETE CASCADE,
+  supplement_id json DEFAULT NULL
 );
 
 -- Création de la table "drink_supplement_association" (Many-to-Many)

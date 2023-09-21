@@ -1,13 +1,12 @@
 # IDE
-/.idea/
-/.vscode/
+**/.idea/
+**/.vscode/
 
 # MacOS
 DS_Store
 
 # Environement File
 .env
-.env.dist
 
 #Debug File
 api/debug.txt
