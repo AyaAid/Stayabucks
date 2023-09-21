@@ -1,7 +1,7 @@
 import json
 from typing import Dict
 
-from fastapi import HTTPException, APIRouter
+from fastapi import HTTPException, APIRouter, Query
 from pydantic import BaseModel
 
 from config.database import connect_to_database, close_database_connection
@@ -54,7 +54,27 @@ async def showdrinks(user_id):
         drinks = cursor.fetchall()
         close_database_connection()
         if not drinks:
-            raise HTTPException(status_code=404, detail="Aucune boisson trouvée pour cet utilisateur")
+            raise HTTPException(
+                status_code=404, detail="Aucune boisson trouvée pour cet utilisateur")
         return {"drinks": drinks}, 200
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/search/")
+async def search_drinks(query: str = Query(..., description="Recherchez une boisson par nom ou description")):
+    db_connection, db_cursor = connect_to_database()
+
+    try:
+        # Utilisez une requête SQL pour rechercher des boissons par nom ou description
+        search_query = f"%{query}%"
+        query = "SELECT * FROM drink WHERE name LIKE %s OR description LIKE %s"
+        db_cursor.execute(query, (search_query, search_query))
+        drinks = db_cursor.fetchall()
+
+        return drinks
+    except Exception as e:
+        raise e
+    finally:
+        close_database_connection()
+
