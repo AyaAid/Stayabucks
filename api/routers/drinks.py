@@ -4,7 +4,7 @@ from typing import Dict
 from fastapi import HTTPException, APIRouter
 from pydantic import BaseModel
 
-from api.config.database import connect_to_database, close_database_connection
+from config.database import connect_to_database, close_database_connection
 
 router = APIRouter()
 
