@@ -10,7 +10,7 @@ class LikeCreate(BaseModel):
     drink_created_id: int
 
 
-@router.post("/likes/")
+@router.post("/likes/", tags=["Ratings"])
 def add_like(like_create: LikeCreate):
     """
     Add a new "like" for a drink created by a specific user.
