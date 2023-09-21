@@ -1,5 +1,0 @@
-uvicorn~=0.23.2
-fastapi~=0.103.1
-pydantic~=2.3.0
-python-dotenv~=1.0.0
-mysql-connector-python~=8.0.32
