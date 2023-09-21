@@ -1,22 +1,14 @@
-from fastapi import FastAPI, APIRouter
-from routers.drinks import router as create_drinks_router
+from fastapi import FastAPI
+from routers.drinks import router as drinks_router
 from routers.admin import router as admin_router
+from routers.authentication import router as authentication_router
 
 app = FastAPI()
 
-# Endpoint pour l'inscription
-# @router.post("/signup/")
-# async def signup(user: sign_up.UserCreate):
-#     return sign_up.signup_user(user)
-#
-# # Endpoint pour la connexion
-# @router.post("/login/")
-# async def login_endpoint(username: str, password: str):
-#     return login.login_user(username, password)
-#
 # Ajoutez le routeur à l'application FastAPI
-app.include_router(create_drinks_router)
 app.include_router(admin_router)
+app.include_router(authentication_router)
+app.include_router(drinks_router)
 
 if __name__ == "__main__":
     import uvicorn
