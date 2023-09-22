@@ -19,6 +19,7 @@ class UserLogin(BaseModel):
 
 
 class UserUpdate(BaseModel):
+    user_id: str = Field(..., description="The user id is required")
     username: str = Field(..., description="The username is required")
     email: EmailStr = Field(..., description="The email address is required")
     password: str = Field(..., description="The password is required")
