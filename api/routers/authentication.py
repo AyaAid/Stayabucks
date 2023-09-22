@@ -121,7 +121,7 @@ async def login_endpoint(user_data: UserLogin):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.put("/user", tags=["Authentication"])
+@router.put("/user/", tags=["Authentication"])
 def update_user(user_update: UserUpdate):
     """
     Update user information in the database.
@@ -151,7 +151,7 @@ def update_user(user_update: UserUpdate):
 
             # Update user information
             query = "UPDATE users SET username = %s, email = %s WHERE id = %s"
-            values = (user_update.username, user_update.email, user_id)
+            values = (user_update.username, user_update.email, user_update.user_id)
             db_cursor.execute(query, values)
             db_connection.commit()
 
