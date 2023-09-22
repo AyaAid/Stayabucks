@@ -55,5 +55,8 @@ def add_like(like_create: LikeCreate):
             db_connection.commit()
 
             return {"message": "Like added successfully"}
+    except HTTPException as http_exception:
+        raise http_exception
     except Exception as e:
+        # Raise a custom HTTP exception with a 500 status code
         raise HTTPException(status_code=500, detail=str(e))

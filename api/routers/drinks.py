@@ -3,7 +3,7 @@ from typing import Dict, Optional
 from fastapi import HTTPException, APIRouter, Query
 from pydantic import BaseModel
 
-from config.database import DatabaseConnection  # Import the new connection class
+from config.database import DatabaseConnection
 
 router = APIRouter()
 
@@ -29,8 +29,18 @@ async def create_drink(drinks: Drinks):
         HTTPException: If an error occurs during the operation.
     """
     try:
-        # Use the new connection class with a context manager
-        with DatabaseConnection() as (conn, cursor):
+        db_connection = DatabaseConnection()
+
+        # Vérifier si l'utilisateur existe
+        if not db_connection.user_exists(drinks.user_id):
+            raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+
+        # Vérifier si la boisson existe
+        if not db_connection.drink_exists(drinks.drink_id):
+            raise HTTPException(status_code=404, detail="Boisson non trouvée")
+
+        # Use the existing db_connection instance with a context manager
+        with db_connection as (conn, cursor):
             supplement_id_json = json.dumps(drinks.supplement_id)
             cursor.execute(
                 "INSERT INTO drink_created (user_id, drink_id, supplement_id) VALUES (%s, %s, %s)",
@@ -38,7 +48,10 @@ async def create_drink(drinks: Drinks):
             )
             conn.commit()
         return {"message": "Drink created successfully"}, 200
+    except HTTPException as http_exception:
+        raise http_exception
     except Exception as e:
+        # Raise a custom HTTP exception with a 500 status code
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -93,7 +106,10 @@ async def show_drinks(user_id):
         return {"drinks": drinks_with_prices}, 200
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid supplement_ids data")
+    except HTTPException as http_exception:
+        raise http_exception
     except Exception as e:
+        # Raise a custom HTTP exception with a 500 status code
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -126,63 +142,64 @@ async def last_drinks(user_id):
         if not drinks:
             raise HTTPException(status_code=404, detail="No drinks found for this user")
         return {"drinks": drinks}, 200
+    except HTTPException as http_exception:
+        raise http_exception
     except Exception as e:
+        # Raise a custom HTTP exception with a 500 status code
         raise HTTPException(status_code=500, detail=str(e))
 
-
-@router.get("/search/")
-async def search_drinks(query: str = Query(..., description="Recherchez une boisson par nom ou description"),
-                        max_price: Optional[float] = Query(None, description="Filtrez par prix maximum")):
-    """
-    Recherche des boissons en fonction d'un terme de recherche (nom ou description) et éventuellement d'un filtre de prix maximum.
-
-    Args:
-        query (str): Terme de recherche pour le nom ou la description de la boisson.
-        max_price (float, optional): Prix maximum pour filtrer les résultats (facultatif).
-
-    Raises:
-        HTTPException 400: Si le filtre de prix est trop bas pour trouver des boissons.
-        HTTPException 404: Si aucune boisson n'est trouvée pour la recherche.
-
-    Returns:
-        list: Liste des boissons correspondantes (peut être vide).
-
-    Example:
-        Pour rechercher des boissons avec le terme "Latte" et un prix maximum de 6.0 :
-        `/search/?query=Latte&max_price=6.0`
-    """
-    db_connection, db_cursor = connect_to_database()
-
-    try:
-        # Utilisez une requête SQL pour rechercher des boissons par nom ou description
-        # Ajoutez des % pour rechercher des correspondances partielles
-        search_query = f"%{query}%"
-        query = "SELECT * FROM drink WHERE (name LIKE %s OR description LIKE %s)"
-
-        # Si max_price est spécifié, ajoutez un filtre de prix
-        if max_price is not None:
-            query += " AND price <= %s"
-            db_cursor.execute(query, (search_query, search_query, max_price))
-        else:
-            db_cursor.execute(query, (search_query, search_query))
-
-        drinks = db_cursor.fetchall()
-
-        if not drinks:
-            # Si aucune boisson n'est trouvée, renvoyer un message personnalisé
-            if max_price is not None and max_price <= 0:
-                raise HTTPException(
-                    status_code=400, detail="Le filtre de prix est trop bas pour trouver des boissons")
-            else:
-                raise HTTPException(
-                    status_code=404, detail="Aucune boisson trouvée")
-
-        return drinks
-    except HTTPException:
-        # Capturer l'exception HTTPException et la répercuter
-        raise
-    except Exception as e:
-        raise e
-    finally:
-        close_database_connection()
-
+# @router.get("/search/")
+# async def search_drinks(query: str = Query(..., description="Recherchez une boisson par nom ou description"),
+#                         max_price: Optional[float] = Query(None, description="Filtrez par prix maximum")):
+#     """
+#     Recherche des boissons en fonction d'un terme de recherche (nom ou description) et éventuellement d'un filtre de prix maximum.
+#
+#     Args:
+#         query (str): Terme de recherche pour le nom ou la description de la boisson.
+#         max_price (float, optional): Prix maximum pour filtrer les résultats (facultatif).
+#
+#     Raises:
+#         HTTPException 400: Si le filtre de prix est trop bas pour trouver des boissons.
+#         HTTPException 404: Si aucune boisson n'est trouvée pour la recherche.
+#
+#     Returns:
+#         list: Liste des boissons correspondantes (peut être vide).
+#
+#     Example:
+#         Pour rechercher des boissons avec le terme "Latte" et un prix maximum de 6.0 :
+#         `/search/?query=Latte&max_price=6.0`
+#     """
+#     db_connection, db_cursor = connect_to_database()
+#
+#     try:
+#         # Utilisez une requête SQL pour rechercher des boissons par nom ou description
+#         # Ajoutez des % pour rechercher des correspondances partielles
+#         search_query = f"%{query}%"
+#         query = "SELECT * FROM drink WHERE (name LIKE %s OR description LIKE %s)"
+#
+#         # Si max_price est spécifié, ajoutez un filtre de prix
+#         if max_price is not None:
+#             query += " AND price <= %s"
+#             db_cursor.execute(query, (search_query, search_query, max_price))
+#         else:
+#             db_cursor.execute(query, (search_query, search_query))
+#
+#         drinks = db_cursor.fetchall()
+#
+#         if not drinks:
+#             # Si aucune boisson n'est trouvée, renvoyer un message personnalisé
+#             if max_price is not None and max_price <= 0:
+#                 raise HTTPException(
+#                     status_code=400, detail="Le filtre de prix est trop bas pour trouver des boissons")
+#             else:
+#                 raise HTTPException(
+#                     status_code=404, detail="Aucune boisson trouvée")
+#
+#         return drinks
+#     except HTTPException:
+#         # Capturer l'exception HTTPException et la répercuter
+#         raise
+#     except Exception as e:
+#         raise e
+#     finally:
+#         close_database_connection()

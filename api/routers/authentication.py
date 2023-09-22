@@ -52,8 +52,11 @@ async def signup(user: UserCreate):
             db_connection.commit()
 
             return {"message": "Registration successful"}
+    except HTTPException as http_exception:
+        raise http_exception
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Error during registration")
+        # Raise a custom HTTP exception with a 500 status code
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/login/", tags=["Authentication"])
@@ -81,8 +84,11 @@ async def login_endpoint(user_data: UserLogin):
                 raise HTTPException(status_code=401, detail="Incorrect email or password")
 
             return {"message": "Login successful"}
+    except HTTPException as http_exception:
+        raise http_exception
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Error during authentication")
+        # Raise a custom HTTP exception with a 500 status code
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/logout/", tags=["Authentication"])
@@ -99,8 +105,11 @@ def logout_user():
     try:
         with DatabaseConnection() as (db_connection, _):
             return {"message": "Logout successful"}
+    except HTTPException as http_exception:
+        raise http_exception
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Error during logout")
+        # Raise a custom HTTP exception with a 500 status code
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.put("/update/{user_id}", tags=["Authentication"])
@@ -135,5 +144,8 @@ def update_user(user_id: int, user_update: UserUpdate):
             db_connection.commit()
 
             return {"message": "Update successful"}
+    except HTTPException as http_exception:
+        raise http_exception
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Error during update")
+        # Raise a custom HTTP exception with a 500 status code
+        raise HTTPException(status_code=500, detail=str(e))
