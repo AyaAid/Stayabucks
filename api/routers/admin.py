@@ -5,11 +5,23 @@ from config.database import DatabaseConnection  # Import the new connection clas
 router = APIRouter()
 
 
+class DrinksAdd(BaseModel):
+    name: str = Field(..., description="The name is required")
+    description: str = Field(..., description="The description is required")
+    price: float = Field(..., description="The price is required")
+
+
 class Drinks(BaseModel):
     drink_id: int = Field(..., description="The id is required")
     name: str = Field(..., description="The name is required")
     description: str = Field(..., description="The description is required")
     price: float = Field(..., description="The price is required")
+
+
+class SupplementAdd(BaseModel):
+    name: str = Field(..., description="The name is required")
+    price: float = Field(..., description="The price is required")
+    type_id: int = Field(..., description="The type id is required")
 
 
 class Supplement(BaseModel):
@@ -19,8 +31,8 @@ class Supplement(BaseModel):
     type_id: int = Field(..., description="The type id is required")
 
 
-@router.post("/add-drink/", tags=["Admin - Drinks"])
-async def add_drink(drinks: Drinks):
+@router.post("/drink/", tags=["Admin - Drinks"])
+async def add_drink(drinks: DrinksAdd):
     """
     Add a new drink to the database.
 
@@ -40,7 +52,7 @@ async def add_drink(drinks: Drinks):
                 (drinks.name, drinks.description, drinks.price)
             )
             conn.commit()
-        return {"message": "Drink added successfully"}, 200
+        return {"message": "Drink added successfully"}
     except HTTPException as http_exception:
         raise http_exception
     except Exception as e:
@@ -48,7 +60,7 @@ async def add_drink(drinks: Drinks):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.put("/update-drink/", tags=["Admin - Drinks"])
+@router.put("/drink/", tags=["Admin - Drinks"])
 async def update_drink(updated_drink: Drinks):
     """
     Update drink information in the database.
@@ -73,10 +85,10 @@ async def update_drink(updated_drink: Drinks):
 
             cursor.execute(
                 "UPDATE drink SET name = %s, description = %s, price = %s WHERE id = %s",
-                (updated_drink.name, updated_drink.description, updated_drink.price, drink_id)
+                (updated_drink.name, updated_drink.description, updated_drink.price, updated_drink.drink_id)
             )
             conn.commit()
-        return {"message": "Drink updated successfully"}, 200
+        return {"message": "Drink updated successfully"}
     except HTTPException as http_exception:
         raise http_exception
     except Exception as e:
@@ -84,7 +96,7 @@ async def update_drink(updated_drink: Drinks):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.delete("/delete-drink/{drink_id}/", tags=["Admin - Drinks"])
+@router.delete("/drink/{drink_id}/", tags=["Admin - Drinks"])
 async def delete_drink(drink_id: int):
     """
     Delete a drink from the database.
@@ -108,7 +120,7 @@ async def delete_drink(drink_id: int):
 
             cursor.execute("DELETE FROM drink WHERE id = %s", (drink_id,))
             conn.commit()
-        return {"message": "Drink deleted successfully"}, 200
+        return {"message": "Drink deleted successfully"}
     except HTTPException as http_exception:
         raise http_exception
     except Exception as e:
@@ -116,8 +128,8 @@ async def delete_drink(drink_id: int):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/add-supplement/", tags=["Admin - Supplement"])
-async def add_supplement(supplement: Supplement):
+@router.post("/supplement/", tags=["Admin - Supplement"])
+async def add_supplement(supplement: SupplementAdd):
     """
     Add a new supplement to the database.
 
@@ -143,7 +155,7 @@ async def add_supplement(supplement: Supplement):
                 (supplement.name, supplement.price, supplement.type_id)
             )
             conn.commit()
-        return {"message": "Supplement added successfully"}, 200
+        return {"message": "Supplement added successfully"}
     except HTTPException as http_exception:
         raise http_exception
     except Exception as e:
@@ -151,7 +163,7 @@ async def add_supplement(supplement: Supplement):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.put("/update-supplement/", tags=["Admin - Supplement"])
+@router.put("/supplement/", tags=["Admin - Supplement"])
 async def update_supplement(updated_supplement: Supplement):
     """
     Update supplement information in the database.
@@ -183,10 +195,10 @@ async def update_supplement(updated_supplement: Supplement):
 
             cursor.execute(
                 "UPDATE supplement SET name = %s, price = %s, type_id = %s WHERE id = %s",
-                (updated_supplement.name, updated_supplement.price, updated_supplement.type_id, supplement_id)
+                (updated_supplement.name, updated_supplement.price, updated_supplement.type_id, updated_supplement.supplement_id)
             )
             conn.commit()
-        return {"message": "Supplement updated successfully"}, 200
+        return {"message": "Supplement updated successfully"}
     except HTTPException as http_exception:
         raise http_exception
     except Exception as e:
@@ -194,7 +206,7 @@ async def update_supplement(updated_supplement: Supplement):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.delete("/delete-supplement/{supplement_id}/", tags=["Admin - Supplement"])
+@router.delete("/supplement/{supplement_id}/", tags=["Admin - Supplement"])
 async def delete_supplement(supplement_id: int):
     """
     Delete a supplement from the database.
@@ -218,7 +230,7 @@ async def delete_supplement(supplement_id: int):
 
             cursor.execute("DELETE FROM supplement WHERE id = %s", (supplement_id,))
             conn.commit()
-        return {"message": "Supplement deleted successfully"}, 200
+        return {"message": "Supplement deleted successfully"}
     except HTTPException as http_exception:
         raise http_exception
     except Exception as e:

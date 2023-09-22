@@ -14,7 +14,7 @@ class Drinks(BaseModel):
     supplement_id: Dict
 
 
-@router.post('/create-drink', tags=["Drinks"])
+@router.post('/perso-drink', tags=["Drinks"])
 async def create_drink(drinks: Drinks):
     """
     Create drinks in the database.
@@ -47,7 +47,7 @@ async def create_drink(drinks: Drinks):
                 (drinks.user_id, drinks.drink_id, supplement_id_json)
             )
             conn.commit()
-        return {"message": "Drink created successfully"}, 200
+        return {"message": "Drink created successfully"}
     except HTTPException as http_exception:
         raise http_exception
     except Exception as e:
@@ -55,7 +55,7 @@ async def create_drink(drinks: Drinks):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get('/show-drinks/{user_id}', tags=["Drinks"])
+@router.get('/perso-drinks/{user_id}', tags=["Drinks"])
 async def show_drinks(user_id):
     """
     Retrieve drinks created by a specific user.
@@ -103,7 +103,7 @@ async def show_drinks(user_id):
         if not drinks_with_prices:
             raise HTTPException(status_code=404, detail="No drinks found for this user")
 
-        return {"drinks": drinks_with_prices}, 200
+        return {"drinks": drinks_with_prices}
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid supplement_ids data")
     except HTTPException as http_exception:
@@ -141,7 +141,7 @@ async def last_drinks(user_id):
 
         if not drinks:
             raise HTTPException(status_code=404, detail="No drinks found for this user")
-        return {"drinks": drinks}, 200
+        return {"drinks": drinks}
     except HTTPException as http_exception:
         raise http_exception
     except Exception as e:
