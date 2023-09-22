@@ -1,4 +1,5 @@
 import re
+import bcrypt
 
 from fastapi import HTTPException, APIRouter
 from pydantic import BaseModel, EmailStr, Field
@@ -65,9 +66,11 @@ async def signup(user: UserCreate):
             if existing_user:
                 raise HTTPException(status_code=400, detail="Email already in use")
 
+            hashed_password = bcrypt.hashpw(user.password.encode('utf-8'), bcrypt.gensalt())
+
             # Add the user to the database
             query = "INSERT INTO users (username, email, password, role) VALUES (%s, %s, %s, %s)"
-            values = (user.username, user.email, user.password, "user")
+            values = (user.username, user.email, hashed_password, "user")
             db_cursor.execute(query, values)
             db_connection.commit()
 
