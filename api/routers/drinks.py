@@ -29,8 +29,18 @@ async def create_drink(drinks: Drinks):
         HTTPException: If an error occurs during the operation.
     """
     try:
-        # Use the new connection class with a context manager
-        with DatabaseConnection() as (conn, cursor):
+        db_connection = DatabaseConnection()
+
+        # Vérifier si l'utilisateur existe
+        if not db_connection.user_exists(drinks.user_id):
+            raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
+
+        # Vérifier si la boisson existe
+        if not db_connection.drink_exists(drinks.drink_id):
+            raise HTTPException(status_code=404, detail="Boisson non trouvée")
+
+        # Use the existing db_connection instance with a context manager
+        with db_connection as (conn, cursor):
             supplement_id_json = json.dumps(drinks.supplement_id)
             cursor.execute(
                 "INSERT INTO drink_created (user_id, drink_id, supplement_id) VALUES (%s, %s, %s)",
@@ -38,7 +48,10 @@ async def create_drink(drinks: Drinks):
             )
             conn.commit()
         return {"message": "Drink created successfully"}, 200
+    except HTTPException as http_exception:
+        raise http_exception
     except Exception as e:
+        # Raise a custom HTTP exception with a 500 status code
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -93,7 +106,10 @@ async def show_drinks(user_id):
         return {"drinks": drinks_with_prices}, 200
     except ValueError:
         raise HTTPException(status_code=400, detail="Invalid supplement_ids data")
+    except HTTPException as http_exception:
+        raise http_exception
     except Exception as e:
+        # Raise a custom HTTP exception with a 500 status code
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -126,7 +142,10 @@ async def last_drinks(user_id):
         if not drinks:
             raise HTTPException(status_code=404, detail="No drinks found for this user")
         return {"drinks": drinks}, 200
+    except HTTPException as http_exception:
+        raise http_exception
     except Exception as e:
+        # Raise a custom HTTP exception with a 500 status code
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -169,6 +188,7 @@ async def last_drinks(user_id):
 #         drinks = db_cursor.fetchall()
 #
 #         if not drinks:
+#             # Si aucune boisson n'est trouvée, renvoyer un message personnalisé
 #             if max_price is not None and max_price <= 0:
 #                 raise HTTPException(
 #                     status_code=400, detail="Le filtre de prix est trop bas pour trouver des boissons")
@@ -178,6 +198,8 @@ async def last_drinks(user_id):
 #
 #         return drinks
 #     except HTTPException:
+#         # Capturer l'exception HTTPException et la répercuter
+
 #         raise
 #     except Exception as e:
 #         raise e
