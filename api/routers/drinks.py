@@ -31,11 +31,11 @@ async def create_drink(drinks: Drinks):
     try:
         db_connection = DatabaseConnection()
 
-        # Vérifier si l'utilisateur existe
+        # check if user exist
         if not db_connection.user_exists(drinks.user_id):
             raise HTTPException(status_code=404, detail="Utilisateur non trouvé")
 
-        # Vérifier si la boisson existe
+        # check if drink exist
         if not db_connection.drink_exists(drinks.drink_id):
             raise HTTPException(status_code=404, detail="Boisson non trouvée")
 

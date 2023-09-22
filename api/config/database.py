@@ -38,6 +38,15 @@ class DatabaseConnection:
             self.db_cursor = None
 
     def user_exists(self, user_id):
+        """
+        Check if a user exists in the database.
+
+        Args:
+            user_id (int): The ID of the user.
+
+        Returns:
+            bool: True if the user exists, False otherwise.
+        """
         try:
             query = "SELECT COUNT(*) FROM users WHERE id = %s"
             self.db_cursor.execute(query, (user_id,))
@@ -48,11 +57,19 @@ class DatabaseConnection:
             else:
                 return False  # User does not exist
         except mysql.connector.Error as err:
-            # Gérez les erreurs de la base de données ici
-            print(f"Erreur lors de la vérification de l'existence de l'utilisateur : {err}")
+            print(f"Error checking user existence: {err}")
             return False
 
     def drink_exists(self, drink_id):
+        """
+        Check if a drink exists in the database.
+
+        Args:
+            drink_id (int): The ID of the drink.
+
+        Returns:
+            bool: True if the drink exists, False otherwise.
+        """
         try:
             query = "SELECT COUNT(*) FROM drink WHERE id = %s"
             self.db_cursor.execute(query, (drink_id,))
@@ -63,8 +80,7 @@ class DatabaseConnection:
             else:
                 return False  # Drink does not exist
         except mysql.connector.Error as err:
-            # Handle database errors here
-            print(f"Erreur lors de la vérification de l'existence de la boisson : {err}")
+            print(f"Error checking drink existence: {err}")
             return False
 
     def __enter__(self):
@@ -85,8 +101,6 @@ class DatabaseConnection:
 # Using the MySQL database connection with a context manager
 with DatabaseConnection() as (connection, cursor):
     if connection is not None and cursor is not None:
-        # Database connection succeeded
         print("Database connection succeeded.")
     else:
-        # Database connection failed, take appropriate action
         print("Database connection failed. Please check connection parameters.")
