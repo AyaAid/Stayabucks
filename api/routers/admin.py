@@ -6,12 +6,14 @@ router = APIRouter()
 
 
 class Drinks(BaseModel):
+    drink_id: int = Field(..., description="The id is required")
     name: str = Field(..., description="The name is required")
     description: str = Field(..., description="The description is required")
     price: float = Field(..., description="The price is required")
 
 
 class Supplement(BaseModel):
+    supplement_id: int = Field(..., description="The id is required")
     name: str = Field(..., description="The name is required")
     price: float = Field(..., description="The price is required")
     type_id: int = Field(..., description="The type id is required")
@@ -39,12 +41,15 @@ async def add_drink(drinks: Drinks):
             )
             conn.commit()
         return {"message": "Drink added successfully"}, 200
+    except HTTPException as http_exception:
+        raise http_exception
     except Exception as e:
+        # Raise a custom HTTP exception with a 500 status code
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.put("/update-drink/{drink_id}/", tags=["Admin - Drinks"])
-async def update_drink(drink_id: int, updated_drink: Drinks):
+@router.put("/update-drink/", tags=["Admin - Drinks"])
+async def update_drink(updated_drink: Drinks):
     """
     Update drink information in the database.
 
@@ -60,11 +65,11 @@ async def update_drink(drink_id: int, updated_drink: Drinks):
     """
     try:
         with DatabaseConnection() as (conn, cursor):
-            cursor.execute("SELECT id FROM drink WHERE id = %s", (drink_id,))
+            cursor.execute("SELECT id FROM drink WHERE id = %s", (updated_drink.drink_id,))
             drink_result = cursor.fetchone()
 
             if drink_result is None:
-                return {"message": "The drink does not exist"}, 404
+                raise HTTPException(status_code=404, detail="The drink does not exist")
 
             cursor.execute(
                 "UPDATE drink SET name = %s, description = %s, price = %s WHERE id = %s",
@@ -72,7 +77,10 @@ async def update_drink(drink_id: int, updated_drink: Drinks):
             )
             conn.commit()
         return {"message": "Drink updated successfully"}, 200
+    except HTTPException as http_exception:
+        raise http_exception
     except Exception as e:
+        # Raise a custom HTTP exception with a 500 status code
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -96,12 +104,15 @@ async def delete_drink(drink_id: int):
             drink_result = cursor.fetchone()
 
             if drink_result is None:
-                return {"message": "The drink does not exist"}, 404
+                raise HTTPException(status_code=404, detail="The drink does not exist")
 
             cursor.execute("DELETE FROM drink WHERE id = %s", (drink_id,))
             conn.commit()
         return {"message": "Drink deleted successfully"}, 200
+    except HTTPException as http_exception:
+        raise http_exception
     except Exception as e:
+        # Raise a custom HTTP exception with a 500 status code
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -125,7 +136,7 @@ async def add_supplement(supplement: Supplement):
             type_result = cursor.fetchone()
 
             if type_result is None:
-                return {"message": "The type does not exist"}, 404
+                raise HTTPException(status_code=404, detail="The type does not exist")
 
             cursor.execute(
                 "INSERT INTO supplement (name, price, type_id) VALUES (%s, %s, %s)",
@@ -133,12 +144,15 @@ async def add_supplement(supplement: Supplement):
             )
             conn.commit()
         return {"message": "Supplement added successfully"}, 200
+    except HTTPException as http_exception:
+        raise http_exception
     except Exception as e:
+        # Raise a custom HTTP exception with a 500 status code
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.put("/update-supplement/{supplement_id}/", tags=["Admin - Supplement"])
-async def update_supplement(supplement_id: int, updated_supplement: Supplement):
+@router.put("/update-supplement/", tags=["Admin - Supplement"])
+async def update_supplement(updated_supplement: Supplement):
     """
     Update supplement information in the database.
 
@@ -155,17 +169,17 @@ async def update_supplement(supplement_id: int, updated_supplement: Supplement):
     """
     try:
         with DatabaseConnection() as (conn, cursor):
-            cursor.execute("SELECT id FROM supplement WHERE id = %s", (supplement_id,))
+            cursor.execute("SELECT id FROM supplement WHERE id = %s", (updated_supplement.supplement_id,))
             supplement_result = cursor.fetchone()
 
             if supplement_result is None:
-                return {"message": "The supplement does not exist"}, 404
+                raise HTTPException(status_code=404, detail="The supplement does not exist")
 
             cursor.execute("SELECT id FROM supplement_type WHERE id = %s", (updated_supplement.type_id,))
             type_result = cursor.fetchone()
 
             if type_result is None:
-                return {"message": "The supplement type does not exist"}, 404
+                raise HTTPException(status_code=404, detail="The type does not exist")
 
             cursor.execute(
                 "UPDATE supplement SET name = %s, price = %s, type_id = %s WHERE id = %s",
@@ -173,7 +187,10 @@ async def update_supplement(supplement_id: int, updated_supplement: Supplement):
             )
             conn.commit()
         return {"message": "Supplement updated successfully"}, 200
+    except HTTPException as http_exception:
+        raise http_exception
     except Exception as e:
+        # Raise a custom HTTP exception with a 500 status code
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -197,10 +214,13 @@ async def delete_supplement(supplement_id: int):
             supplement_result = cursor.fetchone()
 
             if supplement_result is None:
-                return {"message": "The supplement does not exist"}, 404
+                raise HTTPException(status_code=404, detail="The supplement does not exist")
 
             cursor.execute("DELETE FROM supplement WHERE id = %s", (supplement_id,))
             conn.commit()
         return {"message": "Supplement deleted successfully"}, 200
+    except HTTPException as http_exception:
+        raise http_exception
     except Exception as e:
+        # Raise a custom HTTP exception with a 500 status code
         raise HTTPException(status_code=500, detail=str(e))
