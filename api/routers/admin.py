@@ -19,7 +19,7 @@ class Supplement(BaseModel):
     type_id: int = Field(..., description="The type id is required")
 
 
-@router.post("/add-drink/", tags=["Admin - Drinks"])
+@router.post("/drink/", tags=["Admin - Drinks"])
 async def add_drink(drinks: Drinks):
     """
     Add a new drink to the database.
@@ -48,7 +48,7 @@ async def add_drink(drinks: Drinks):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.put("/update-drink/", tags=["Admin - Drinks"])
+@router.put("/drink/", tags=["Admin - Drinks"])
 async def update_drink(updated_drink: Drinks):
     """
     Update drink information in the database.
@@ -84,7 +84,7 @@ async def update_drink(updated_drink: Drinks):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.delete("/delete-drink/{drink_id}/", tags=["Admin - Drinks"])
+@router.delete("/drink/{drink_id}/", tags=["Admin - Drinks"])
 async def delete_drink(drink_id: int):
     """
     Delete a drink from the database.
@@ -116,7 +116,7 @@ async def delete_drink(drink_id: int):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/add-supplement/", tags=["Admin - Supplement"])
+@router.post("/supplement/", tags=["Admin - Supplement"])
 async def add_supplement(supplement: Supplement):
     """
     Add a new supplement to the database.
@@ -151,7 +151,7 @@ async def add_supplement(supplement: Supplement):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.put("/update-supplement/", tags=["Admin - Supplement"])
+@router.put("/supplement/", tags=["Admin - Supplement"])
 async def update_supplement(updated_supplement: Supplement):
     """
     Update supplement information in the database.
@@ -194,7 +194,7 @@ async def update_supplement(updated_supplement: Supplement):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.delete("/delete-supplement/{supplement_id}/", tags=["Admin - Supplement"])
+@router.delete("/supplement/{supplement_id}/", tags=["Admin - Supplement"])
 async def delete_supplement(supplement_id: int):
     """
     Delete a supplement from the database.
