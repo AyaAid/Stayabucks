@@ -29,12 +29,46 @@ class DatabaseConnection:
     """
 
     def __init__(self):
-        self.db_connection = None
-        self.db_cursor = None
+        try:
+            self.db_connection = mysql.connector.connect(**db_config)
+            self.db_cursor = self.db_connection.cursor(dictionary=True)
+        except mysql.connector.Error as err:
+            print(f"Error during database connection: {err}")
+            self.db_connection = None
+            self.db_cursor = None
+
+    def user_exists(self, user_id):
+        try:
+            query = "SELECT COUNT(*) FROM users WHERE id = %s"
+            self.db_cursor.execute(query, (user_id,))
+            result = self.db_cursor.fetchone()
+
+            if result and 'COUNT(*)' in result and result['COUNT(*)'] > 0:
+                return True  # User exists
+            else:
+                return False  # User does not exist
+        except mysql.connector.Error as err:
+            # Gérez les erreurs de la base de données ici
+            print(f"Erreur lors de la vérification de l'existence de l'utilisateur : {err}")
+            return False
+
+    def drink_exists(self, drink_id):
+        try:
+            query = "SELECT COUNT(*) FROM drink WHERE id = %s"
+            self.db_cursor.execute(query, (drink_id,))
+            result = self.db_cursor.fetchone()
+
+            if result and 'COUNT(*)' in result and result['COUNT(*)'] > 0:
+                return True  # Drink exists
+            else:
+                return False  # Drink does not exist
+        except mysql.connector.Error as err:
+            # Handle database errors here
+            print(f"Erreur lors de la vérification de l'existence de la boisson : {err}")
+            return False
 
     def __enter__(self):
         try:
-            # Create a connection to the MySQL database
             self.db_connection = mysql.connector.connect(**db_config)
             self.db_cursor = self.db_connection.cursor(dictionary=True)
             return self.db_connection, self.db_cursor
