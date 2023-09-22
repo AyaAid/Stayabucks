@@ -1,20 +1,20 @@
 from fastapi import HTTPException, APIRouter
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from config.database import DatabaseConnection  # Import the new connection class
 
 router = APIRouter()
 
 
 class Drinks(BaseModel):
-    name: str
-    description: str
-    price: float
+    name: str = Field(..., description="The name is required")
+    description: str = Field(..., description="The description is required")
+    price: float = Field(..., description="The price is required")
 
 
 class Supplement(BaseModel):
-    name: str
-    price: float
-    type_id: int
+    name: str = Field(..., description="The name is required")
+    price: float = Field(..., description="The price is required")
+    type_id: int = Field(..., description="The type id is required")
 
 
 @router.post("/add-drink/", tags=["Admin - Drinks"])
