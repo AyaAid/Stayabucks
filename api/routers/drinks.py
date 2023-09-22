@@ -148,6 +148,7 @@ async def last_drinks(user_id):
         # Raise a custom HTTP exception with a 500 status code
         raise HTTPException(status_code=500, detail=str(e))
 
+
 # @router.get("/search/")
 # async def search_drinks(query: str = Query(..., description="Recherchez une boisson par nom ou description"),
 #                         max_price: Optional[float] = Query(None, description="Filtrez par prix maximum")):
@@ -198,8 +199,10 @@ async def last_drinks(user_id):
 #         return drinks
 #     except HTTPException:
 #         # Capturer l'exception HTTPException et la répercuter
+
 #         raise
 #     except Exception as e:
 #         raise e
 #     finally:
 #         close_database_connection()
+
