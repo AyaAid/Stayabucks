@@ -1,14 +1,16 @@
+import re
+
 from fastapi import HTTPException, APIRouter
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr, Field
 from config.database import DatabaseConnection
 
 router = APIRouter()
 
 
 class UserCreate(BaseModel):
-    username: str
-    email: str
-    password: str
+    username: str = Field(..., description="The username is required")
+    email: EmailStr = Field(..., description="The email address is required")
+    password: str = Field(..., description="The password is required")
 
 
 class UserLogin(BaseModel):
@@ -19,6 +21,19 @@ class UserLogin(BaseModel):
 class UserUpdate(BaseModel):
     username: str
     email: str
+
+
+def is_valid_email(email):
+    # Vérification du format de l'e-mail à l'aide d'une expression régulière
+    email_pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+    if not re.match(email_pattern, email):
+        return False
+
+    # Vous pouvez ajouter des vérifications supplémentaires, par exemple,
+    # vérifier si le domaine de messagerie existe réellement en effectuant une requête DNS.
+    # Cependant, cela peut être une vérification plus avancée.
+
+    return True
 
 
 @router.post("/signup/", tags=["Authentication"])
@@ -37,6 +52,9 @@ async def signup(user: UserCreate):
     """
     try:
         with DatabaseConnection() as (db_connection, db_cursor):
+            if not is_valid_email(user.email):
+                raise HTTPException(status_code=400, detail="Invalid email format")
+
             # Check if the user already exists
             query = "SELECT * FROM users WHERE email = %s"
             db_cursor.execute(query, (user.email,))
@@ -52,8 +70,11 @@ async def signup(user: UserCreate):
             db_connection.commit()
 
             return {"message": "Registration successful"}
+    except HTTPException as http_exception:
+        raise http_exception
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Error during registration")
+        # Raise a custom HTTP exception with a 500 status code
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.post("/login/", tags=["Authentication"])
@@ -81,29 +102,14 @@ async def login_endpoint(user_data: UserLogin):
                 raise HTTPException(status_code=401, detail="Incorrect email or password")
 
             return {"message": "Login successful"}
+    except HTTPException as http_exception:
+        raise http_exception
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Error during authentication")
+        # Raise a custom HTTP exception with a 500 status code
+        raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/logout/", tags=["Authentication"])
-def logout_user():
-    """
-    Handle user logout by closing the database connection.
-
-    Returns:
-        dict: A dictionary containing a success message.
-
-    Raises:
-        HTTPException: If logout fails.
-    """
-    try:
-        with DatabaseConnection() as (db_connection, _):
-            return {"message": "Logout successful"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail="Error during logout")
-
-
-@router.put("/update/{user_id}", tags=["Authentication"])
+@router.put("/update_user/{user_id}", tags=["Authentication"])
 def update_user(user_id: int, user_update: UserUpdate):
     """
     Update user information in the database.
@@ -120,6 +126,9 @@ def update_user(user_id: int, user_update: UserUpdate):
     """
     try:
         with DatabaseConnection() as (db_connection, db_cursor):
+            if not is_valid_email(user_update.email):
+                raise HTTPException(status_code=400, detail="Invalid email format")
+
             # Check if the user exists
             query = "SELECT * FROM users WHERE id = %s"
             db_cursor.execute(query, (user_id,))
@@ -135,5 +144,8 @@ def update_user(user_id: int, user_update: UserUpdate):
             db_connection.commit()
 
             return {"message": "Update successful"}
+    except HTTPException as http_exception:
+        raise http_exception
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Error during update")
+        # Raise a custom HTTP exception with a 500 status code
+        raise HTTPException(status_code=500, detail=str(e))
