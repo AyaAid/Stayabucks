@@ -16,8 +16,10 @@ class UserLogin(BaseModel):
     password: str
 
 class UserUpdate(BaseModel):
-    username: str
-    email: str
+    user_id: str = Field(..., description="The user id is required")
+    username: str = Field(..., description="The username is required")
+    email: EmailStr = Field(..., description="The email address is required")
+    password: str = Field(..., description="The password is required")
 
 def is_valid_email(email):
     # Check email format using a regular expression
@@ -86,14 +88,21 @@ async def login_endpoint(user_data: UserLogin):
     try:
         with DatabaseConnection() as (db_connection, db_cursor):
             # Search for the user in the database
-            query = "SELECT * FROM users WHERE email = %s AND password = %s"
-            db_cursor.execute(query, (user_data.email, user_data.password))
+            query = "SELECT * FROM users WHERE email = %s"
+            db_cursor.execute(query, (user_data.email,))
             user = db_cursor.fetchone()
 
             if user is None:
                 raise HTTPException(status_code=401, detail="Incorrect email or password")
 
-            return {"message": "Login successful"}
+            # Vérifier le mot de passe haché avec bcrypt
+            stored_password_hash = user["password"]
+            provided_password = user_data.password.encode('utf-8')
+
+            if bcrypt.checkpw(provided_password, stored_password_hash.encode('utf-8')):
+                return {"message": "Login successful"}
+            else:
+                raise HTTPException(status_code=401, detail="Incorrect email or password")
     except HTTPException as http_exception:
         raise http_exception
     except Exception as e:
