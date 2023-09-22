@@ -1,41 +1,30 @@
 import re
 import bcrypt
-
 from fastapi import HTTPException, APIRouter
 from pydantic import BaseModel, EmailStr, Field
 from config.database import DatabaseConnection
 
 router = APIRouter()
 
-
 class UserCreate(BaseModel):
     username: str = Field(..., description="The username is required")
     email: EmailStr = Field(..., description="The email address is required")
     password: str = Field(..., description="The password is required")
 
-
 class UserLogin(BaseModel):
     email: str
     password: str
-
 
 class UserUpdate(BaseModel):
     username: str
     email: str
 
-
 def is_valid_email(email):
-    # Vérification du format de l'e-mail à l'aide d'une expression régulière
+    # Check email format using a regular expression
     email_pattern = r'^[\w\.-]+@[\w\.-]+\.\w+$'
     if not re.match(email_pattern, email):
         return False
-
-    # Vous pouvez ajouter des vérifications supplémentaires, par exemple,
-    # vérifier si le domaine de messagerie existe réellement en effectuant une requête DNS.
-    # Cependant, cela peut être une vérification plus avancée.
-
     return True
-
 
 @router.post("/signup/", tags=["Authentication"])
 async def signup(user: UserCreate):
